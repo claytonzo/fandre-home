@@ -1,0 +1,234 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold:   #C9A84C;
+  --gold-l: #E8C97A;
+  --dark:   #080604;
+  --slate:  #1A1A2E;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', sans-serif;
+  background: var(--dark);
+  color: #fff;
+  overflow: hidden;
+}
+
+/* ── Backgrounds ── */
+.bg-grid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.bg-glow {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 60%, rgba(201,168,76,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* ── Layout ── */
+main {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  padding: 2rem;
+}
+
+/* ── Header ── */
+header {
+  text-align: center;
+}
+
+.family-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.1s forwards;
+}
+
+.family-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(4rem, 12vw, 9rem);
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: #fff;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.2s forwards;
+}
+
+.family-sub {
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.2);
+  margin-top: 0.4rem;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.3s forwards;
+}
+
+/* ── Cards ── */
+.cards {
+  display: flex;
+  gap: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.5s forwards;
+}
+
+.card {
+  position: relative;
+  width: 240px;
+  height: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.23,1,0.32,1),
+              border-color 0.3s,
+              box-shadow 0.35s;
+  text-decoration: none;
+  color: #fff;
+  display: block;
+}
+
+.card:not(.card--soon):hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(201,168,76,0.5);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 40px rgba(201,168,76,0.1);
+}
+
+.card--soon {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.card-bg {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.3s;
+}
+
+.card-bg--lily {
+  background: linear-gradient(145deg, #1a0e06 0%, #2d1a0a 50%, #0f0a07 100%);
+}
+
+.card-bg--clay {
+  background: linear-gradient(145deg, #0a0a1a 0%, #111128 50%, #080810 100%);
+}
+
+.card:not(.card--soon):hover .card-bg {
+  opacity: 0.7;
+}
+
+.card-inner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem 1.5rem;
+}
+
+.card-tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: auto;
+}
+
+.card--soon .card-tag {
+  color: rgba(255,255,255,0.3);
+}
+
+.card-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.8rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-bottom: 0.6rem;
+}
+
+.card--lily .card-name  { color: var(--gold-l); }
+.card--clay .card-name  { color: rgba(255,255,255,0.4); }
+
+.card-detail {
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.45);
+}
+
+.card-arrow {
+  margin-top: 1.25rem;
+  font-size: 1.1rem;
+  color: var(--gold);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.card:not(.card--soon):hover .card-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.card-lock {
+  margin-top: 1.25rem;
+  font-size: 1rem;
+  color: rgba(255,255,255,0.15);
+}
+
+/* Accent line on lily card */
+.card--lily::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card--lily:hover::after { opacity: 1; }
+
+/* ── Footer ── */
+footer {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.12);
+  z-index: 1;
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  html, body { overflow: auto; }
+  main { height: auto; min-height: 100vh; padding: 4rem 1.5rem 5rem; }
+  .cards { flex-direction: column; align-items: center; }
+  .card { width: 100%; max-width: 300px; height: 260px; }
+}
