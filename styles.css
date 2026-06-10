@@ -131,6 +131,22 @@ header {
   background: linear-gradient(145deg, #060a1a 0%, #0d1530 50%, #060810 100%);
 }
 
+.card-bg--carter {
+  background: linear-gradient(145deg, #060f09 0%, #0d1f12 50%, #060a07 100%);
+}
+
+.card--carter::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #3DDC97, transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card--carter:hover::after { opacity: 1; }
+.card--carter .card-name { color: #3DDC97; }
+
 .card--clay::after {
   content: '';
   position: absolute;
