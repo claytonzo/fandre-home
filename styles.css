@@ -128,8 +128,19 @@ header {
 }
 
 .card-bg--clay {
-  background: linear-gradient(145deg, #0a0a1a 0%, #111128 50%, #080810 100%);
+  background: linear-gradient(145deg, #060a1a 0%, #0d1530 50%, #060810 100%);
 }
+
+.card--clay::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #4A9EFF, transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.card--clay:hover::after { opacity: 1; }
 
 .card:not(.card--soon):hover .card-bg {
   opacity: 0.7;
