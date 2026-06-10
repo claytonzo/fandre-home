@@ -244,6 +244,20 @@ footer {
   letter-spacing: 0.2em;
   color: rgba(255,255,255,0.12);
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.footer-tribute {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: rgba(201,168,76,0.25);
+  transition: color 0.4s;
+}
+
+.footer-tribute:hover {
+  color: rgba(232,201,122,0.6);
 }
 
 /* ── Animations ── */
