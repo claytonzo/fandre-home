@@ -107,6 +107,10 @@ button, input { font: inherit; color: inherit; }
   display: flex; align-items: center; gap: 1.2rem; flex-shrink: 0;
   padding: .7rem 1.1rem; border-bottom: 1px solid var(--line);
   background: rgba(8,6,4,.6); backdrop-filter: blur(12px);
+  /* backdrop-filter makes this a stacking context, trapping the search
+     dropdown's z-index inside it. Without a z-index here the stage — a later
+     sibling — paints over the dropdown and eats its clicks. */
+  position: relative; z-index: 20;
 }
 .brand { text-decoration: none; display: flex; align-items: baseline; gap: .5rem; flex-shrink: 0; }
 .brand-mark { font-family: 'Bebas Neue', sans-serif; font-size: 1.35rem; letter-spacing: .12em; color: var(--gold-l); }
