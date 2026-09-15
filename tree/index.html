@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>Fandre Family Tree</title>
+  <meta name="description" content="The Fandre family tree — eight generations, 1668 to today." />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta property="og:title" content="Fandre Family Tree" />
+  <meta property="og:description" content="Eight generations of the Fandre family. Private — passphrase required." />
+  <meta property="og:url" content="https://fandre.com/tree/" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌳</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tree.css" />
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<!-- ─────────────  passphrase gate  ───────────── -->
+<section id="gate" class="gate">
+  <div class="gate-inner">
+    <p class="eyebrow">The Fandre Family</p>
+    <h1 class="wordmark">FAMILY TREE</h1>
+    <p class="gate-sub">Eight generations &middot; Damme 1668 &rarr; Minnesota today</p>
+
+    <form id="gate-form" class="gate-form" autocomplete="off">
+      <label class="sr-only" for="pass">Family passphrase</label>
+      <input id="pass" type="password" placeholder="family passphrase"
+             autocomplete="current-password" spellcheck="false" />
+      <button type="submit" id="gate-go" aria-label="Open the tree">
+        <span class="go-arrow">&rarr;</span>
+      </button>
+    </form>
+    <p id="gate-msg" class="gate-msg" role="status" aria-live="polite">
+      1,004 people &middot; encrypted
+    </p>
+
+    <label class="remember">
+      <input type="checkbox" id="remember" /> <span>remember on this device</span>
+    </label>
+  </div>
+  <p class="gate-foot">
+    This page is encrypted. It holds living relatives, so please don't share the passphrase outside the family.
+  </p>
+</section>
+
+<!-- ─────────────  the tree  ───────────── -->
+<main id="app" class="app" hidden>
+
+  <header class="bar">
+    <a class="brand" href="/" title="fandre.com">
+      <span class="brand-mark">FANDRE</span><span class="brand-sub">family tree</span>
+    </a>
+
+    <div class="search-wrap">
+      <input id="search" type="search" placeholder="Search 1,004 people…"
+             autocomplete="off" spellcheck="false" aria-label="Search people" />
+      <kbd>/</kbd>
+      <div id="results" class="results" hidden></div>
+    </div>
+
+    <div class="bar-actions">
+      <button id="btn-journey" class="ghost" title="Walk the line back to 1668">
+        Walk the line
+      </button>
+      <button id="btn-home" class="ghost" title="Back to the starting person">Reset</button>
+      <button id="btn-help" class="ghost icon" title="Help" aria-label="Help">?</button>
+    </div>
+  </header>
+
+  <div id="stage" class="stage">
+    <svg id="tree" aria-label="Family tree">
+      <defs>
+        <linearGradient id="linkUp" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%"  stop-color="#C9A84C" stop-opacity="0.65" />
+          <stop offset="100%" stop-color="#C9A84C" stop-opacity="0.12" />
+        </linearGradient>
+        <linearGradient id="linkDown" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#C9A84C" stop-opacity="0.5" />
+          <stop offset="100%" stop-color="#5a8fa8" stop-opacity="0.18" />
+        </linearGradient>
+        <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="5" result="b" />
+          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+      <g id="viewport">
+        <g id="links"></g>
+        <g id="nodes"></g>
+      </g>
+    </svg>
+
+    <div class="hint" id="hint">drag to pan &middot; scroll to zoom &middot; click anyone to re-centre</div>
+
+    <div class="zoom">
+      <button id="zoom-in"  aria-label="Zoom in">+</button>
+      <button id="zoom-out" aria-label="Zoom out">&minus;</button>
+      <button id="zoom-fit" aria-label="Fit to screen">&#9723;</button>
+    </div>
+
+    <!-- person detail -->
+    <aside id="panel" class="panel" hidden>
+      <button id="panel-close" class="panel-close" aria-label="Close">&times;</button>
+      <div id="panel-body"></div>
+    </aside>
+  </div>
+
+  <!-- legend -->
+  <div class="legend" id="legend"></div>
+</main>
+
+<!-- ─────────────  help  ───────────── -->
+<div id="help" class="modal" hidden>
+  <div class="modal-card">
+    <button id="help-close" class="panel-close" aria-label="Close">&times;</button>
+    <h2>Getting around</h2>
+    <dl class="keys">
+      <dt>Click anyone</dt><dd>re-centres the tree on that person</dd>
+      <dt>Drag / scroll</dt><dd>pan and zoom</dd>
+      <dt><kbd>/</kbd></dt><dd>jump to search</dd>
+      <dt><kbd>&uarr;</kbd> <kbd>&darr;</kbd></dt><dd>move to a parent or a child</dd>
+      <dt><kbd>Esc</kbd></dt><dd>close a panel</dd>
+      <dt>Walk the line</dt><dd>travels up the deepest documented line, generation by generation, to Damme in 1668</dd>
+    </dl>
+    <h2>Reading the tree</h2>
+    <p>Ancestors rise above the person in the centre, descendants fall below. A
+      gold ring marks whoever is in focus. Colour follows the family name, so you
+      can see where the Chereks marry into the Fandres and where the Meirose line
+      comes in from Nebraska.</p>
+    <p>Everything here comes from the GEDCOM your grandfather built. Where two
+      records disagreed about a date or a place, both are shown &mdash; look for
+      <em>“according to another record”</em>.</p>
+  </div>
+</div>
+
+<script src="tree.js"></script>
+</body>
+</html>

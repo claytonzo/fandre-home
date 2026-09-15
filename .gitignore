@@ -1,0 +1,4 @@
+# never publish the plaintext tree or the GEDCOM
+tree/data.json
+tree/*.ged
+.DS_Store
