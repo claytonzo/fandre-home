@@ -629,7 +629,18 @@ function boot(DATA) {
       if (kd.length) { e.preventDefault(); goTo(kd[0]); }
     }
   });
-  addEventListener('resize', () => centre(true));
+  // A window resize is not the only way the stage changes size: loading in a
+  // background tab or a hidden pane reports a zero-height viewport, so the
+  // first fit is computed from nothing. Re-fit whenever the box actually changes.
+  let lastW = 0, lastH = 0;
+  new ResizeObserver(([entry]) => {
+    const { width, height } = entry.contentRect;
+    if (!width || !height) return;
+    if (Math.abs(width - lastW) < 2 && Math.abs(height - lastH) < 2) return;
+    const first = !lastW;
+    lastW = width; lastH = height;
+    centre(first);
+  }).observe($('#stage'));
 
   /* ───── go ───── */
   search.placeholder = `Search ${DATA.counts.people.toLocaleString()} people…`;

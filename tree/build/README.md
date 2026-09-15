@@ -31,11 +31,29 @@ protection is the encryption.
 
 ## Crypto
 
-PBKDF2-SHA256, 310,000 iterations, random 16-byte salt → AES-256-GCM with a
+PBKDF2-SHA256, 600,000 iterations, random 16-byte salt → AES-256-GCM with a
 random 12-byte IV. Both sides use WebCrypto (`node:crypto` webcrypto in the
 build, `crypto.subtle` in the browser) so they cannot drift apart. GCM is
 authenticated, so a wrong passphrase fails cleanly instead of returning junk.
+The browser reads the iteration count out of the file, so raising it here does
+not break older links.
 
-The ciphertext is public. Its contents are not — but anyone who downloaded the
-file keeps that copy forever, so changing the passphrase later protects future
-versions, not past ones.
+## Passphrase strength — the part that actually matters
+
+The ciphertext is public, so the only thing standing between it and a reader is
+the passphrase, and an attacker can grind it offline as fast as their hardware
+allows. Assume roughly 15,000 PBKDF2 guesses/second for a determined attacker
+with a handful of GPUs at 600k iterations.
+
+| Passphrase | Entropy | Time to break |
+| --- | --- | --- |
+| 4 words from a 108-word list | 27 bits | **~1 hour** |
+| 6 words from this 368-word list | 51 bits | ~5,000 years |
+
+The generator defaults to six words for that reason. If you choose your own,
+choose it on that basis: length and unpredictability, not cleverness. A
+memorable sentence of six or more uncommon words is fine; a name and a birth
+year is not — this file is a genealogy, so those are the first guesses.
+
+Anyone who downloaded the published file keeps that copy forever, so changing
+the passphrase later protects future versions, not past ones.

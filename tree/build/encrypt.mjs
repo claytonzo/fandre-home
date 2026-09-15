@@ -11,23 +11,52 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { webcrypto as crypto } from 'node:crypto';
 
-const ITERATIONS = 310000;          // OWASP guidance for PBKDF2-SHA256
+const ITERATIONS = 600000;          // above OWASP guidance: the ciphertext is public
 const VERSION = 1;
 
 // Short, common, unambiguous words - a passphrase that survives being read
 // aloud over the phone to a relative.
-const WORDS = ('amber anchor apple arrow autumn bacon badge basket beacon birch ' +
-  'bishop bramble bridge bronze butter canyon cedar cellar cherry chimney cider ' +
-  'cinder clover cobalt copper coral cottage crimson crystal dagger dawn delta ' +
-  'diamond ember falcon fern forest fossil garnet ginger granite harbor harvest ' +
-  'hazel heron hollow indigo island ivory jasper juniper kettle lantern lilac ' +
-  'linen maple marble meadow mercy mineral mint mosaic nectar nettle nickel ' +
-  'nutmeg oak onyx opal orchard otter pebble pepper pewter pine pocket poppy ' +
-  'prairie quartz quill raven ribbon river rosemary saffron sage salmon sandal ' +
-  'sapphire shadow silver slate sparrow spruce sugar summit sunset thistle ' +
-  'thunder timber topaz trellis tulip velvet walnut willow window winter').split(' ');
+const WORDS = ('amber anchor apple apron arbor archer arrow aspen attic autumn bacon badge ' +
+  'bagel bakery balcony bamboo banjo barley barn basil basket beacon beetle ' +
+  'bellow birch biscuit bishop bison blanket blossom bluff bonfire bottle ' +
+  'boulder bramble branch brass bread bridge bristle bronze brook broom bucket ' +
+  'buffalo bugle bundle burrow butter button cabin cactus canal candle cannon ' +
+  'canoe canvas canyon caramel cardinal carpet carrot cascade castle cavern ' +
+  'cedar cellar chapel cheddar cherry chestnut chimney chisel cider cinder ' +
+  'cinnamon circus cistern citrus clover cobalt cobble cocoa comet compass ' +
+  'copper coral cottage cotton crackle cradle crane crater crayon crimson ' +
+  'crocus crystal cypress dagger dairy daisy dampen dandy dawn delta denim ' +
+  'desert diamond dogwood dolphin domino donkey drift drummer dunes dusk eagle ' +
+  'ember emerald falcon fathom feather fennel fern ferry fiddle fjord flannel ' +
+  'flint flutter forest fossil fountain foxglove freckle frost galley garden ' +
+  'garnet gazelle ginger glacier glimmer granary granite gravel grotto grove ' +
+  'gully gypsum hammock harbor harvest hatchet hazel heather hedge hemlock ' +
+  'heron hickory hollow honey hornet hurdle indigo inkwell iris island ivory ' +
+  'jasmine jasper jetty juniper kettle kindle lagoon lantern lattice lavender ' +
+  'ledger lemon lichen lilac lily linen lobster locket lodge lotus lumber ' +
+  'lyric magnet mallard mango manor maple marble marigold marsh meadow medley ' +
+  'mercy mesa midden mineral minnow mint mirror mitten mosaic moss mulberry ' +
+  'mullet mustard nectar nettle nickel noodle nutmeg oak oasis oatmeal onyx ' +
+  'opal orchard oregano osprey otter outpost oyster paddle pantry parcel ' +
+  'parsley pasture pebble pelican pepper pewter pigeon pillar pine pocket ' +
+  'pollen pond poppy porch portal pottery prairie pumpkin quarry quartz quill ' +
+  'quilt radish rafter ragtime rambler rattle raven ribbon ridge ripple river ' +
+  'robin rocket rosemary rudder saddle saffron sage sailor salmon sandal ' +
+  'sapling sapphire satchel scallop scarlet seagull sesame shadow shale shanty ' +
+  'shelter shingle shovel shutter signal silver skillet slate sleigh smolder ' +
+  'socket sorrel sparrow spindle spire spruce squash stable starling stencil ' +
+  'stirrup stone stork stream stucco sugar summit sunset surf swallow sycamore ' +
+  'tabby talon tangerine tapestry teapot tempo tender thicket thimble thistle ' +
+  'thorn thunder tidal timber tinder toffee topaz torch tower trellis trestle ' +
+  'trolley trout tulip tundra tunnel turnip turret twilight umber valley ' +
+  'vanilla velvet vessel village vine violet wagon walnut warble waterfall ' +
+  'weaver whistle willow window winter wisteria wombat woodland yarrow yeast ' +
+  'yonder').split(' ');
 
-function makePassphrase(words = 4) {
+// Six words from this list is ~48 bits. Against an offline attack on the
+// published ciphertext at ~15k PBKDF2 guesses/sec that is centuries; four
+// words from a short list would have been about an hour.
+function makePassphrase(words = 6) {
   const picks = new Uint32Array(words);
   crypto.getRandomValues(picks);
   return Array.from(picks, n => WORDS[n % WORDS.length]).join('-');
