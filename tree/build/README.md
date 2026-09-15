@@ -22,6 +22,41 @@ git add tree/data.enc.json && git commit -m "Update tree data"
 Omit the passphrase argument and `encrypt.mjs` generates a fresh four-word one
 and prints it. `TREE_PASSPHRASE` in the environment works too.
 
+## Adding photos
+
+There are none in the tree yet — the GEDCOM references exactly one image and
+its path points at a folder on Dad's Windows machine, so the file has never
+left that PC. Getting that folder is the thing worth chasing.
+
+Once you have images, name each file after the person and run one command:
+
+```bash
+python3 ../fandre-ged/tools/export_tree.py -o /tmp/tree-data.json
+node tree/build/add_photos.mjs ~/Pictures/family /tmp/tree-data.json 'the-passphrase'
+node tree/build/encrypt.mjs /tmp/tree-data.json tree/data.enc.json 'the-passphrase'
+git add tree/photos tree/data.enc.json && git commit -m "Add photos"
+```
+
+Use the **same passphrase** for both scripts or the photos will not open.
+
+### Naming a file
+
+| Filename | Matches on |
+| --- | --- |
+| `I35.jpg`, `@I35@.jpg` | the GEDCOM record id — most precise |
+| `Thomas Ervin Fandre.jpg` | the full name as it appears in the tree |
+| `thomas-fandre.jpg` | first name + surname |
+| `Helen Meirose 1912.jpg` | add a birth year to break a tie |
+
+Anything it cannot place is listed and skipped — it never guesses. Two people
+called Daniel Cherek will be reported as ambiguous until you add a year. HEIC
+straight off an iPhone is fine; `sips` converts it.
+
+Each photo is shrunk to 640px, encrypted separately, and written to
+`tree/photos/`. The page fetches a face only when that person appears on
+screen, so a tree with hundreds of photos still opens instantly. Which people
+have photos is part of the encrypted payload, not a public file listing.
+
 ## What the exporter drops
 
 `export_tree.py` never emits addresses, phone numbers or email addresses, and

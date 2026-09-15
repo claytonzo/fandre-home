@@ -200,6 +200,15 @@ button, input { font: inherit; color: inherit; }
 }
 .node .halo { fill: none; stroke: var(--gold); stroke-width: 2; opacity: 0; }
 
+/* Faces decrypt asynchronously; the monogram holds the spot until one lands. */
+.node .face {
+  clip-path: circle(50%);
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+.node .face.in { opacity: 1; }
+.node .mono { transition: opacity .4s ease; }
+
 .node:hover .plate { fill: rgba(32,27,19,.96); stroke: rgba(201,168,76,.55); }
 .node:hover .ring  { opacity: 1; stroke-width: 2.2; }
 .node.focus .plate { stroke: var(--gold); stroke-width: 1.8; fill: rgba(38,31,18,.96); }
@@ -239,10 +248,24 @@ button, input { font: inherit; color: inherit; }
 .panel-close:hover { color: var(--gold-l); }
 
 .p-mono {
-  width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center;
-  font-family: 'Bebas Neue', sans-serif; font-size: 21px; letter-spacing: .05em;
+  width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 25px; letter-spacing: .05em;
   border: 1.5px solid; margin-bottom: .9rem;
+  background-size: cover; background-position: center top;
+  transition: box-shadow .4s ease;
 }
+.p-mono.has-face { box-shadow: 0 6px 22px rgba(0,0,0,.55), 0 0 0 3px rgba(201,168,76,.13); }
+.p-mono.has-face span { opacity: 0; }
+.p-mono span { transition: opacity .4s ease; }
+
+/* search-result avatar */
+.rdot {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 11px; letter-spacing: .04em;
+  background-size: cover; background-position: center top;
+}
+.rdot.has-face { color: transparent; }
 .p-name { font-family: 'Bebas Neue', sans-serif; font-size: 1.85rem; letter-spacing: .04em; line-height: 1.05; }
 .p-life { font-size: .78rem; color: var(--gold); letter-spacing: .1em; margin-top: .2rem; font-variant-numeric: tabular-nums; }
 .p-sec { margin-top: 1.4rem; }

@@ -78,7 +78,7 @@ $('#gate-form').addEventListener('submit', async e => {
   try {
     const data = await decrypt(pass);
     if ($('#remember').checked) { try { localStorage.setItem(STORE_KEY, pass); } catch {} }
-    open(data);
+    open(data, pass);
   } catch (err) {
     gateMsg.className = 'gate-msg err';
     gateMsg.textContent = /load/.test(err.message) ? err.message : 'that passphrase does not open this file';
@@ -88,14 +88,14 @@ $('#gate-form').addEventListener('submit', async e => {
   }
 });
 
-function open(data) {
+function open(data, passphrase) {
   gate.classList.add('leaving');
   setTimeout(() => {
     gate.hidden = true;
     const app = $('#app');
     app.hidden = false;
     app.classList.add('entering');
-    boot(data);
+    boot(data, passphrase);
   }, reduced ? 0 : 560);
 }
 
@@ -104,12 +104,12 @@ function open(data) {
   let saved = null;
   try { saved = localStorage.getItem(STORE_KEY); } catch {}
   if (!saved) return;
-  try { open(await decrypt(saved)); }
+  try { open(await decrypt(saved), saved); }
   catch { try { localStorage.removeItem(STORE_KEY); } catch {} }
 })();
 
 /* ─────────────────────────  the app  ───────────────────────── */
-function boot(DATA) {
+function boot(DATA, PASSPHRASE) {
   const people = new Map(DATA.people.map(p => [p.i, p]));
   const fams = new Map(DATA.families.map(f => [f.i, f]));
 
@@ -128,6 +128,52 @@ function boot(DATA) {
       sp.spouses.push(...par.filter(x => x !== s && people.has(x)));
     }
   }
+
+  /* --- photos ---------------------------------------------------------
+     Each photo is its own encrypted file, fetched only when someone who has
+     one comes on screen. They share one salt, so the expensive PBKDF2 step
+     happens once per session rather than once per face. */
+  const PHOTOS = DATA.photos || {};
+  const photoCache = new Map();      // person id -> blob URL (or null once failed)
+  let photoKey = null;
+
+  function photoKeyOnce() {
+    if (!photoKey) {
+      const salt = Uint8Array.from(atob(DATA.photoSalt), c => c.charCodeAt(0));
+      photoKey = crypto.subtle
+        .importKey('raw', new TextEncoder().encode(PASSPHRASE), 'PBKDF2', false, ['deriveKey'])
+        .then(base => crypto.subtle.deriveKey(
+          { name: 'PBKDF2', salt, iterations: 600000, hash: 'SHA-256' },
+          base, { name: 'AES-GCM', length: 256 }, false, ['decrypt']));
+    }
+    return photoKey;
+  }
+
+  async function loadPhoto(id) {
+    if (photoCache.has(id)) return photoCache.get(id);
+    const slot = PHOTOS[id];
+    if (slot === undefined || !DATA.photoSalt) return null;
+    const pending = (async () => {
+      try {
+        const res = await fetch(`photos/${slot}.enc`, { cache: 'force-cache' });
+        if (!res.ok) throw new Error(res.status);
+        const blob = await res.json();
+        const raw = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+        const bytes = await crypto.subtle.decrypt(
+          { name: 'AES-GCM', iv: raw(blob.iv) }, await photoKeyOnce(), raw(blob.ct));
+        const url = URL.createObjectURL(new Blob([bytes], { type: 'image/jpeg' }));
+        photoCache.set(id, url);
+        return url;
+      } catch {
+        photoCache.set(id, null);      // don't retry a photo that will not load
+        return null;
+      }
+    })();
+    photoCache.set(id, pending);
+    return pending;
+  }
+
+  const hasPhoto = id => PHOTOS[id] !== undefined;
 
   /* --- colour by family name --- */
   const BRANCH = [
@@ -311,10 +357,26 @@ function boot(DATA) {
         style: 'transform-origin:center', 
       }));
       g.append(el('rect', { class: 'plate', x: -NW / 2, y: -NH / 2, width: NW, height: NH, rx: 10 }));
-      g.append(el('circle', { class: 'ring', cx: -NW / 2 + 24, cy: 0, r: 15, stroke: colour }));
-      const mono = el('text', { class: 'mono', x: -NW / 2 + 24, y: 1, fill: colour });
+      const avatarX = -NW / 2 + 24;
+      g.append(el('circle', { class: 'ring', cx: avatarX, cy: 0, r: 15, stroke: colour }));
+      const mono = el('text', { class: 'mono', x: avatarX, y: 1, fill: colour });
       mono.textContent = initials(p);
       g.append(mono);
+
+      if (hasPhoto(id)) {
+        // The monogram stays until the face decrypts, then fades over it.
+        const img = el('image', {
+          class: 'face', x: avatarX - 15, y: -15, width: 30, height: 30,
+          preserveAspectRatio: 'xMidYMid slice',
+        });
+        g.append(img);
+        Promise.resolve(loadPhoto(id)).then(url => {
+          if (!url || !img.isConnected) return;
+          img.setAttribute('href', url);
+          img.classList.add('in');
+          mono.style.opacity = 0;
+        });
+      }
 
       const nm = el('text', { class: 'nm', x: -NW / 2 + 46, y: -7 });
       nm.textContent = shortName(p);
@@ -478,7 +540,8 @@ function boot(DATA) {
       `${esc(e.d || e.y || '')}${e.p ? `<br><span style="color:var(--dimmer)">${esc(e.p)}</span>` : ''}</span></div>` : '';
 
     const parts = [];
-    parts.push(`<div class="p-mono" style="border-color:${colour};color:${colour}">${esc(initials(p))}</div>`);
+    parts.push(`<div class="p-mono" style="border-color:${colour};color:${colour}" data-face="${id}">` +
+               `<span>${esc(initials(p))}</span></div>`);
     parts.push(`<div class="p-name">${esc(p.n)}</div>`);
     const life = yearsOf(p);
     parts.push(`<div class="p-life">${esc(life || (p.dead ? 'dates unknown' : 'living'))}` +
@@ -504,6 +567,14 @@ function boot(DATA) {
       p.no.map(n => `<p class="p-note">${esc(n)}</p>`).join('') + `</div>`);
 
     panelBody.innerHTML = parts.join('');
+    if (hasPhoto(id)) {
+      const slotEl = panelBody.querySelector('[data-face]');
+      Promise.resolve(loadPhoto(id)).then(url => {
+        if (!url || !slotEl.isConnected) return;
+        slotEl.classList.add('has-face');
+        slotEl.style.backgroundImage = `url("${url}")`;
+      });
+    }
     const wasHidden = panel.hidden;
     panel.hidden = false;
     panel.scrollTop = 0;
@@ -533,10 +604,21 @@ function boot(DATA) {
         const marked = at < 0 ? esc(name)
           : esc(name.slice(0, at)) + '<mark>' + esc(name.slice(at, at + q.length)) + '</mark>' + esc(name.slice(at + q.length));
         return `<button class="result" data-go="${h.i}" role="option">` +
+               `<span class="rdot"${hasPhoto(h.i) ? ' data-face="' + h.i + '"' : ''}` +
+               ` style="background:${colourOf(h.p)}22;color:${colourOf(h.p)}">` +
+               `${esc(initials(h.p))}</span>` +
                `<span class="rn">${marked}</span><span class="ry">${esc(yearsOf(h.p))}</span></button>`;
       }).join('');
     }
     results.hidden = false;
+    for (const dot of results.querySelectorAll('[data-face]')) {
+      const who = +dot.dataset.face;
+      Promise.resolve(loadPhoto(who)).then(url => {
+        if (!url || !dot.isConnected) return;
+        dot.classList.add('has-face');
+        dot.style.backgroundImage = `url("${url}")`;
+      });
+    }
   }
   search.addEventListener('input', runSearch);
   search.addEventListener('focus', runSearch);
