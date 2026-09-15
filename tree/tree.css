@@ -160,6 +160,7 @@ button, input { font: inherit; color: inherit; }
 }
 .ghost:hover { color: var(--gold-l); border-color: rgba(201,168,76,.4); background: rgba(201,168,76,.08); }
 .ghost.icon { width: 32px; padding: .42rem 0; }
+a.ghost { text-decoration: none; display: inline-flex; align-items: center; }
 .ghost[disabled] { opacity: .4; pointer-events: none; }
 
 /* ── stage ── */

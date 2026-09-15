@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fandre Research Worklist</title>
+  <meta name="description" content="Open questions in the Fandre family tree and the records that answer them." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔎</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="research.css?v=d23d83c7" />
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+
+<section id="gate" class="gate">
+  <div class="gate-inner">
+    <p class="eyebrow">The Fandre Family</p>
+    <h1 class="wordmark">RESEARCH</h1>
+    <p class="gate-sub">Open questions &middot; and the records that answer them</p>
+
+    <form id="gate-form" class="gate-form" autocomplete="off">
+      <label class="sr-only" for="pass">Family passphrase</label>
+      <input id="pass" type="password" placeholder="family passphrase"
+             autocomplete="current-password" spellcheck="false" />
+      <button type="submit" id="gate-go" aria-label="Open the worklist">
+        <span class="go-arrow">&rarr;</span>
+      </button>
+    </form>
+    <p id="gate-msg" class="gate-msg" role="status" aria-live="polite">same passphrase as the tree</p>
+
+    <label class="remember"><input type="checkbox" id="remember" /> <span>remember on this device</span></label>
+  </div>
+  <p class="gate-foot">This page names living relatives, so it is encrypted like the tree. Please don't share the passphrase outside the family.</p>
+</section>
+
+<main id="app" class="app" hidden>
+  <nav class="topbar">
+    <a class="brand" href="/"><span class="brand-mark">FANDRE</span><span class="brand-sub">research</span></a>
+    <div class="navlinks">
+      <a href="/tree/">The tree &rarr;</a>
+      <button id="btn-print" class="ghost" title="Print this list">Print</button>
+    </div>
+  </nav>
+  <article id="doc" class="doc"></article>
+</main>
+
+<script src="research.js?v=3f962a83"></script>
+</body>
+</html>
