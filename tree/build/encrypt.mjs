@@ -9,6 +9,7 @@
 // the contents are not.
 
 import { readFileSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { webcrypto as crypto } from 'node:crypto';
 
 const ITERATIONS = 600000;          // above OWASP guidance: the ciphertext is public
@@ -95,6 +96,8 @@ async function main() {
     ct: b64(ciphertext),
   }));
 
+  stampAssets();
+
   const grew = ((ciphertext.byteLength / plaintext.length - 1) * 100).toFixed(0);
   console.log(`encrypted ${plaintext.length.toLocaleString()} bytes -> ${dest}`);
   console.log(`AES-256-GCM, PBKDF2-SHA256 x${ITERATIONS.toLocaleString()} (+${grew}% before base64)`);
@@ -102,6 +105,30 @@ async function main() {
     console.log(`\n  PASSPHRASE:  ${passphrase}\n`);
     console.log('  Write this down. It is not stored anywhere and cannot be recovered');
     console.log('  from the published file - losing it means re-encrypting from the GEDCOM.');
+  }
+}
+
+/*
+ GitHub Pages serves tree.js and tree.css with a ten-minute max-age, while the
+ data is fetched no-store and is therefore always current. A returning visitor
+ could run yesterday's script against today's data — which is exactly how the
+ first photo failed to appear. Stamp each asset URL with a hash of its own
+ contents so a changed file is a changed URL.
+*/
+function stampAssets() {
+  const page = 'tree/index.html';
+  let html = readFileSync(page, 'utf8');
+  let changed = false;
+  for (const asset of ['tree.css', 'tree.js']) {
+    const hash = createHash('sha256')
+      .update(readFileSync(`tree/${asset}`)).digest('hex').slice(0, 8);
+    const pattern = new RegExp(`(["'])${asset}(\\?v=[a-f0-9]+)?\\1`, 'g');
+    const next = html.replace(pattern, `$1${asset}?v=${hash}$1`);
+    if (next !== html) { html = next; changed = true; }
+  }
+  if (changed) {
+    writeFileSync(page, html);
+    console.log('stamped tree.css / tree.js in index.html for cache-busting');
   }
 }
 
