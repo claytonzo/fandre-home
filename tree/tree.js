@@ -136,6 +136,8 @@ function boot(DATA, PASSPHRASE) {
   const PHOTOS = DATA.photos || {};
   const photoCache = new Map();      // person id -> blob URL (or null once failed)
   let photoKey = null;
+  // Short fingerprint of this build's photo salt, used to bust stale caches.
+  const photoTag = (DATA.photoSalt || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 10);
 
   function photoKeyOnce() {
     if (!photoKey) {
@@ -155,7 +157,10 @@ function boot(DATA, PASSPHRASE) {
     if (slot === undefined || !DATA.photoSalt) return null;
     const pending = (async () => {
       try {
-        const res = await fetch(`photos/${slot}.enc`, { cache: 'force-cache' });
+        // Cache hard, but key the URL to this build's salt: re-encrypting the
+        // photos changes the salt, and a stale cached blob would no longer
+        // decrypt — silently leaving a monogram where a face should be.
+        const res = await fetch(`photos/${slot}.enc?v=${photoTag}`, { cache: 'force-cache' });
         if (!res.ok) throw new Error(res.status);
         const blob = await res.json();
         const raw = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
@@ -367,7 +372,8 @@ function boot(DATA, PASSPHRASE) {
         // The monogram stays until the face decrypts, then fades over it.
         const img = el('image', {
           class: 'face', x: avatarX - 15, y: -15, width: 30, height: 30,
-          preserveAspectRatio: 'xMidYMid slice',
+          // Portraits put the face near the top; a centred crop lands on a torso.
+          preserveAspectRatio: 'xMidYMin slice',
         });
         g.append(img);
         Promise.resolve(loadPhoto(id)).then(url => {
