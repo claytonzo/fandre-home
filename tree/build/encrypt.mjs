@@ -96,7 +96,7 @@ async function main() {
     ct: b64(ciphertext),
   }));
 
-  stampAssets('tree/index.html', ['tree.css', 'tree.js']);
+  stampAssets('tree/index.html', ['tree.css', 'tree.js', 'views.js']);
 
   const grew = ((ciphertext.byteLength / plaintext.length - 1) * 100).toFixed(0);
   console.log(`encrypted ${plaintext.length.toLocaleString()} bytes -> ${dest}`);

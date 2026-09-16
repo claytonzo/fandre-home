@@ -57,6 +57,22 @@ Each photo is shrunk to 640px, encrypted separately, and written to
 screen, so a tree with hundreds of photos still opens instantly. Which people
 have photos is part of the encrypted payload, not a public file listing.
 
+## The page's own files
+
+| File | What it does |
+| --- | --- |
+| `tree.js` | the gate, the decryption, the pedigree view, search and the detail panel |
+| `views.js` | the fan, timeline and cosmos views |
+| `tree.css` | everything visual, including the four background layers |
+
+`views.js` gets a narrow context from `tree.js` — the already-decrypted people
+and a few formatters — and never touches the passphrase or the network. If it
+fails to load the page still works; it just has one view instead of four.
+
+`encrypt.mjs` stamps all three with a content hash so a returning visitor can
+never run yesterday's script against today's data. Add any new file to that
+list in `encrypt.mjs` or it will be served stale for up to ten minutes.
+
 ## What the exporter drops
 
 `export_tree.py` never emits addresses, phone numbers or email addresses, and

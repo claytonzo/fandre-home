@@ -321,7 +321,7 @@ function boot(DATA, PASSPHRASE) {
     return `M${a.x},${a.y} C${a.x},${midY} ${b.x},${midY} ${b.x},${b.y}`;
   }
 
-  function render(rootId, animate = true) {
+  let render = function render(rootId, animate = true) {
     focusId = rootId;
     const { nodes, links } = layout(rootId);
 
@@ -336,6 +336,15 @@ function boot(DATA, PASSPHRASE) {
         ? `M${from.x},${from.y} L${to.x},${to.y}` : curve(from, to) });
       path.dataset.a = l.from; path.dataset.b = l.to;
       gLinks.append(path);
+
+      /* A second path over the first, dashed and drifting, so descent reads as
+         something travelling down the line rather than a static wire. Pure
+         CSS animation on a short dash — no per-frame work. */
+      if (l.kind !== 'spouse') {
+        const flow = el('path', { class: `flow ${l.kind}`, d: path.getAttribute('d') });
+        flow.style.animationDelay = `${(l.from * 37 % 900) / 1000}s`;
+        gLinks.append(flow);
+      }
       if (animate && !reduced) {
         const len = path.getTotalLength();
         path.style.strokeDasharray = len;
@@ -464,8 +473,12 @@ function boot(DATA, PASSPHRASE) {
     const panelW = box && !sheet ? box.width : 0;
     const panelH = box && sheet ? box.height : 0;
     const padX = sheet ? 20 : 60, padY = 48;
+    // The view switcher floats over the bottom of the stage; without this the
+    // youngest generation lays out underneath it.
+    const switcherH = document.querySelector('.vmodes')?.offsetHeight ?? 0;
+    const bottomGuard = switcherH ? switcherH + 26 : 0;
     const availW = Math.max(200, r.width - panelW - padX * 2);
-    const availH = Math.max(180, r.height - panelH - padY * 2);
+    const availH = Math.max(180, r.height - panelH - padY * 2 - bottomGuard);
 
     const xs = [...current.values()].map(n => n.x);
     const ys = [...current.values()].map(n => n.y);
@@ -745,6 +758,28 @@ function boot(DATA, PASSPHRASE) {
     lastW = width; lastH = height;
     centre(first);
   }).observe($('#stage'));
+
+  /* ───── alternate views ─────────────────────────────────────────────────
+     views.js draws the fan, timeline and cosmos. It gets a narrow context —
+     the already-decrypted people and a few formatters — and never touches the
+     passphrase or the network. Optional: if the file fails to load the tree
+     still works, it just has one view. */
+  const focusListeners = [];
+  window.FandreViews?.init({
+    people, fams, DATA,
+    colourOf, yearsOf, ageOf, initials, shortName,
+    showPanel,
+    focusId: () => focusId,
+    setFocus: id => { render(id); centre(); },
+    onFocus: fn => focusListeners.push(fn),
+  });
+  // render() is the single place focus changes, so announce it from there.
+  const baseRender = render;
+  render = function (rootId, animate) {
+    const out = baseRender(rootId, animate);
+    for (const fn of focusListeners) fn(rootId);
+    return out;
+  };
 
   /* ───── go ───── */
   search.placeholder = `Search ${DATA.counts.people.toLocaleString()} people…`;

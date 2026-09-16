@@ -13,12 +13,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="tree.css?v=eab3075c" />
+  <link rel="stylesheet" href="tree.css?v=64e284ea" />
 </head>
 <body>
 
+<div class="bg-nebula"></div>
 <div class="bg-grid"></div>
 <div class="bg-glow"></div>
+<div class="bg-dust"></div>
+<div class="bg-vignette"></div>
+<div class="bg-grain"></div>
 
 <!-- ─────────────  passphrase gate  ───────────── -->
 <section id="gate" class="gate">
@@ -36,7 +40,7 @@
       </button>
     </form>
     <p id="gate-msg" class="gate-msg" role="status" aria-live="polite">
-      1,004 people &middot; encrypted
+      1,007 people &middot; encrypted
     </p>
 
     <label class="remember">
@@ -57,7 +61,7 @@
     </a>
 
     <div class="search-wrap">
-      <input id="search" type="search" placeholder="Search 1,004 people…"
+      <input id="search" type="search" placeholder="Search 1,007 people…"
              autocomplete="off" spellcheck="false" aria-label="Search people" />
       <kbd>/</kbd>
       <div id="results" class="results" hidden></div>
@@ -118,13 +122,23 @@
 <div id="help" class="modal" hidden>
   <div class="modal-card">
     <button id="help-close" class="panel-close" aria-label="Close">&times;</button>
+    <h2>Four ways to look</h2>
+    <p>The buttons along the bottom change the whole view. Keys <kbd>1</kbd>
+      to <kbd>4</kbd> do the same thing.</p>
+    <dl class="keys">
+      <dt>Tree</dt><dd>one person with their ancestors above and children below &mdash; the view for following a line</dd>
+      <dt>Fan</dt><dd>every ancestor of one person in a single wheel. Each empty wedge is somebody nobody has found yet, and the rings are wider where more is known</dd>
+      <dt>Timeline</dt><dd>every life in the file drawn against every other, 1668 to today. The glow underneath is how many of the family were alive in each year</dd>
+      <dt>Cosmos</dt><dd>all 1,007 people at once. Distance from the centre is the year a person was born, so the family spreads outward through time; hover anyone to light their line back to the beginning</dd>
+    </dl>
+
     <h2>Getting around</h2>
     <dl class="keys">
-      <dt>Click anyone</dt><dd>re-centres the tree on that person</dd>
-      <dt>Drag / scroll</dt><dd>pan and zoom</dd>
+      <dt>Click anyone</dt><dd>opens them &mdash; in the tree, it also re-centres</dd>
+      <dt>Drag / scroll</dt><dd>pan and zoom the tree</dd>
       <dt><kbd>/</kbd></dt><dd>jump to search</dd>
       <dt><kbd>&uarr;</kbd> <kbd>&darr;</kbd></dt><dd>move to a parent or a child</dd>
-      <dt><kbd>Esc</kbd></dt><dd>close a panel</dd>
+      <dt><kbd>Esc</kbd></dt><dd>close a panel, or return to the tree</dd>
       <dt>Walk the line</dt><dd>travels up the deepest documented line, generation by generation, to Damme in 1668</dd>
     </dl>
     <h2>Reading the tree</h2>
@@ -138,6 +152,7 @@
   </div>
 </div>
 
-<script src="tree.js?v=19e3e96e"></script>
+<script src="views.js?v=981e3d22"></script>
+<script src="tree.js?v=af768bed"></script>
 </body>
 </html>
