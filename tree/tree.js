@@ -197,6 +197,22 @@ function boot(DATA, PASSPHRASE) {
     const last = (p.s || parts[parts.length - 1] || '')[0] || '';
     return (first + last).toUpperCase();
   };
+  // Completed years lived. Subtracting the years alone overstates by one for
+  // anyone who died before that year's birthday — roughly half of everybody.
+  // The full date strings ride along in the payload, so use them when present.
+  const MONTHS = { JAN:1, FEB:2, MAR:3, APR:4, MAY:5, JUN:6,
+                   JUL:7, AUG:8, SEP:9, OCT:10, NOV:11, DEC:12 };
+  const monthDay = ev => {
+    const m = /(?:(\d{1,2})\s+)?([A-Z]{3})\s+\d{3,4}/.exec(ev?.d || '');
+    return m && MONTHS[m[2]] ? { mo: MONTHS[m[2]], da: m[1] ? +m[1] : null } : null;
+  };
+  const ageOf = p => {
+    if (!(p.b?.y && p.d?.y)) return null;
+    let age = p.d.y - p.b.y;
+    const b = monthDay(p.b), d = monthDay(p.d);
+    if (b && d && (d.mo < b.mo || (d.mo === b.mo && (d.da ?? 31) < (b.da ?? 1)))) age -= 1;
+    return age;
+  };
   const yearsOf = p => {
     const b = p.b?.y, d = p.d?.y;
     if (b && d) return `${b}–${d}`;
@@ -551,7 +567,7 @@ function boot(DATA, PASSPHRASE) {
     parts.push(`<div class="p-name">${esc(p.n)}</div>`);
     const life = yearsOf(p);
     parts.push(`<div class="p-life">${esc(life || (p.dead ? 'dates unknown' : 'living'))}` +
-      (p.b?.y && p.d?.y ? ` &middot; ${p.d.y - p.b.y} years` : '') + `</div>`);
+      (ageOf(p) !== null ? ` &middot; ${ageOf(p)} years` : '') + `</div>`);
 
     const events = ev('Born', p.b) + ev('Died', p.d) + ev('Buried', p.u) +
       (p.o ? `<div class="p-row"><span class="k">Work</span><span>${esc(p.o)}</span></div>` : '');
